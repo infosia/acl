@@ -17,13 +17,13 @@ ACLTrack = namedtuple('ACLTrack', 'name rotations translations scales')
 ACL_FILE_FORMAT_VERSION = 1
 
 def print_animation_stacks(scene):
-	for i in range(scene.GetSrcObjectCount(FbxAnimStack.ClassId)):
-		print('  "' + scene.GetSrcObject(FbxAnimStack.ClassId, i).GetName() + '"')
+	for i in range(scene.GetSrcObjectCount()):
+		print('  "' + scene.GetSrcObject(i).GetName() + '"')
 
 def get_animation_stack(scene, anim_stack_name):
-	num_stacks = scene.GetSrcObjectCount(FbxAnimStack.ClassId)
+	num_stacks = scene.GetSrcObjectCount()
 	if num_stacks == 1:
-		anim_stack = scene.GetSrcObject(FbxAnimStack.ClassId, 0)
+		anim_stack = scene.GetSrcObject(0)
 		if len(anim_stack_name) > 0 and anim_stack_name != anim_stack.GetName():
 			print('There is one animation stack, but it\'s called "' + anim_stack.GetName() + '".  Consider omitting the -stack option.')
 			sys.exit(1)
@@ -34,8 +34,8 @@ def get_animation_stack(scene, anim_stack_name):
 			sys.exit(1)
 
 		found = False
-		for i in range(scene.GetSrcObjectCount(FbxAnimStack.ClassId)):
-			anim_stack = scene.GetSrcObject(FbxAnimStack.ClassId, i)
+		for i in range(scene.GetSrcObjectCount()):
+			anim_stack = scene.GetSrcObject(i)
 			if anim_stack.GetName() == anim_stack_name:
 				found = True
 				break
@@ -276,77 +276,77 @@ def parse_tracks(scene, anim_stack, clip, bones, nodes, start_time):
 	return tracks
 
 def print_clip(file, clip):
-	print('clip =', file = file)
-	print('{', file = file)
-	print('\tname = "{}"'.format(clip.name), file = file)
-	print('\tnum_samples = {}'.format(clip.num_samples), file = file)
-	print('\tsample_rate = {}'.format(clip.sample_rate), file = file)
-	print('\terror_threshold = {}'.format(clip.error_threshold), file = file)
-	print('}', file = file)
-	print('', file = file)
+	print >> file, 'clip ='
+	print >> file, '{'
+	print >> file, '\tname = "{}"'.format(clip.name)
+	print >> file, '\tnum_samples = {}'.format(clip.num_samples)
+	print >> file, '\tsample_rate = {}'.format(clip.sample_rate)
+	print >> file, '\terror_threshold = {}'.format(clip.error_threshold)
+	print >> file, '}'
+	print >> file, ''
 
 def print_bones(file, bones):
 	default_rotation = [ 0.0, 0.0, 0.0, 1.0 ]
 	default_translation = [ 0.0, 0.0, 0.0 ]
 	default_scale = [ 1.0, 1.0, 1.0 ]
 
-	print('bones =', file = file)
-	print('[', file = file)
+	print >> file, 'bones ='
+	print >> file, '['
 	for bone in bones:
-		print('\t{', file = file)
-		print('\t\tname = "{}"'.format(bone['name']), file = file)
-		print('\t\tparent = "{}"'.format(bone['parent']), file = file)
-		print('\t\tvertex_distance = {}'.format(bone['vtx_distance']), file = file)
+		print >> file, '\t{'
+		print >> file, '\t\tname = "{}"'.format(bone['name'])
+		print >> file, '\t\tparent = "{}"'.format(bone['parent'])
+		print >> file, '\t\tvertex_distance = {}'.format(bone['vtx_distance'])
 
 		bind_rotation = bone['bind_rotation']
 		if not is_key_default(bind_rotation, default_rotation):
-			print('\t\tbind_rotation = [ {}, {}, {}, {} ]'.format(bind_rotation[0], bind_rotation[1], bind_rotation[2], bind_rotation[3]), file = file)
+			print >> file, '\t\tbind_rotation = [ {}, {}, {}, {} ]'.format(bind_rotation[0], bind_rotation[1], bind_rotation[2], bind_rotation[3])
 
 		bind_translation = bone['bind_translation']
 		if not is_key_default(bind_translation, default_translation):
-			print('\t\tbind_translation = [ {}, {}, {} ]'.format(bind_translation[0], bind_translation[1], bind_translation[2]), file = file)
+			print >> file, '\t\tbind_translation = [ {}, {}, {} ]'.format(bind_translation[0], bind_translation[1], bind_translation[2])
 
 		bind_scale = bone['bind_scale']
 		if not is_key_default(bind_scale, default_scale):
-			print('\t\tbind_scale = [ {}, {}, {} ]'.format(bind_scale[0], bind_scale[1], bind_scale[2]), file = file)
+			print >> file, '\t\tbind_scale = [ {}, {}, {} ]'.format(bind_scale[0], bind_scale[1], bind_scale[2])
 
-		print('\t}', file = file)
-	print(']', file = file)
-	print('', file = file)
+		print >> file, '\t}'
+	print >> file, ']'
+	print >> file, ''
 
 def print_tracks(file, tracks):
-	print('tracks =', file = file)
-	print('[', file = file)
+	print >> file, 'tracks ='
+	print >> file, '['
 	for track in tracks:
 		if len(track.rotations) + len(track.translations) + len(track.scales) == 0:
 			continue
 
-		print('\t{', file = file)
-		print('\t\tname = "{}"'.format(track.name), file = file)
+		print >> file, '\t{'
+		print >> file, '\t\tname = "{}"'.format(track.name)
 		if len(track.rotations) != 0:
-			print('\t\trotations =', file = file)
-			print('\t\t[', file = file)
+			print >> file, '\t\trotations ='
+			print >> file, '\t\t['
 			for rotation in track.rotations:
-				print('\t\t\t[ {}, {}, {}, {} ]'.format(rotation[0], rotation[1], rotation[2], rotation[3]), file = file)
-			print('\t\t]', file = file)
+				print >> file, '\t\t\t[ {}, {}, {}, {} ]'.format(rotation[0], rotation[1], rotation[2], rotation[3])
+			print >> file, '\t\t]'
 
 		if len(track.translations) != 0:
-			print('\t\ttranslations =', file = file)
-			print('\t\t[', file = file)
+			print >> file, '\t\ttranslations ='
+			print >> file, '\t\t['
 			for translation in track.translations:
-				print('\t\t\t[ {}, {}, {} ]'.format(translation[0], translation[1], translation[2]), file = file)
-			print('\t\t]', file = file)
+				print >> file, '\t\t\t[ {}, {}, {} ]'.format(translation[0], translation[1], translation[2])
+			print >> file, '\t\t]'
 
 		if len(track.scales) != 0:
-			print('\t\tscales =', file = file)
-			print('\t\t[', file = file)
+			print >> file, '\t\tscales ='
+			print >> file, '\t\t['
 			for scale in track.scales:
-				print('\t\t\t[ {}, {}, {} ]'.format(scale[0], scale[1], scale[2]), file = file)
-			print('\t\t]', file = file)
+				print >> file, '\t\t\t[ {}, {}, {} ]'.format(scale[0], scale[1], scale[2])
+			print >> file, '\t\t]'
 
-		print('\t}', file = file)
-	print(']', file = file)
-	print('', file = file)
+		print >> file, '\t}'
+	print >> file, ']'
+	print >> file, ''
 
 def parse_argv():
 	options = {}
@@ -418,8 +418,8 @@ def convert_file(fbx_filename, anim_stack_name, start_time, end_time, acl_filena
 		else:
 			file = sys.stdout
 
-		print('version = {}'.format(ACL_FILE_FORMAT_VERSION), file = file)
-		print('', file = file)
+		print >> file, 'version = {}'.format(ACL_FILE_FORMAT_VERSION)
+		print >> file, ''
 		print_clip(file, clip)
 		print_bones(file, bones)
 		print_tracks(file, tracks)
