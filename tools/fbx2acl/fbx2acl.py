@@ -17,13 +17,13 @@ ACLTrack = namedtuple('ACLTrack', 'name rotations translations scales')
 ACL_FILE_FORMAT_VERSION = 1
 
 def print_animation_stacks(scene):
-	for i in range(scene.GetSrcObjectCount()):
-		print('  "' + scene.GetSrcObject(i).GetName() + '"')
+	for i in range(scene.GetSrcObjectCount(FbxAnimStack.ClassId)):
+		print('  "' + scene.GetSrcObject(FbxAnimStack.ClassId, i).GetName() + '"')
 
 def get_animation_stack(scene, anim_stack_name):
-	num_stacks = scene.GetSrcObjectCount()
+	num_stacks = scene.GetSrcObjectCount(FbxAnimStack.ClassId)
 	if num_stacks == 1:
-		anim_stack = scene.GetSrcObject(0)
+		anim_stack = scene.GetSrcObject(FbxAnimStack.ClassId, 0)
 		if len(anim_stack_name) > 0 and anim_stack_name != anim_stack.GetName():
 			print('There is one animation stack, but it\'s called "' + anim_stack.GetName() + '".  Consider omitting the -stack option.')
 			sys.exit(1)
@@ -34,8 +34,8 @@ def get_animation_stack(scene, anim_stack_name):
 			sys.exit(1)
 
 		found = False
-		for i in range(scene.GetSrcObjectCount()):
-			anim_stack = scene.GetSrcObject(i)
+		for i in range(scene.GetSrcObjectCount(FbxAnimStack.ClassId)):
+			anim_stack = scene.GetSrcObject(FbxAnimStack.ClassId, i)
 			if anim_stack.GetName() == anim_stack_name:
 				found = True
 				break
@@ -276,77 +276,77 @@ def parse_tracks(scene, anim_stack, clip, bones, nodes, start_time):
 	return tracks
 
 def print_clip(file, clip):
-	print('clip =')
-	print('{')
-	print('\tname = "{}"'.format(clip.name))
-	print('\tnum_samples = {}'.format(clip.num_samples))
-	print('\tsample_rate = {}'.format(clip.sample_rate))
-	print('\terror_threshold = {}'.format(clip.error_threshold))
-	print('}')
-	print('')
+	print('clip =', file = file)
+	print('{', file = file)
+	print('\tname = "{}"'.format(clip.name), file = file)
+	print('\tnum_samples = {}'.format(clip.num_samples), file = file)
+	print('\tsample_rate = {}'.format(clip.sample_rate), file = file)
+	print('\terror_threshold = {}'.format(clip.error_threshold), file = file)
+	print('}', file = file)
+	print('', file = file)
 
 def print_bones(file, bones):
 	default_rotation = [ 0.0, 0.0, 0.0, 1.0 ]
 	default_translation = [ 0.0, 0.0, 0.0 ]
 	default_scale = [ 1.0, 1.0, 1.0 ]
 
-	print('bones =')
-	print('[')
+	print('bones =', file = file)
+	print('[', file = file)
 	for bone in bones:
-		print('\t{')
-		print('\t\tname = "{}"'.format(bone['name']))
-		print('\t\tparent = "{}"'.format(bone['parent']))
-		print('\t\tvertex_distance = {}'.format(bone['vtx_distance']))
+		print('\t{', file = file)
+		print('\t\tname = "{}"'.format(bone['name']), file = file)
+		print('\t\tparent = "{}"'.format(bone['parent']), file = file)
+		print('\t\tvertex_distance = {}'.format(bone['vtx_distance']), file = file)
 
 		bind_rotation = bone['bind_rotation']
 		if not is_key_default(bind_rotation, default_rotation):
-			print('\t\tbind_rotation = [ {}, {}, {}, {} ]'.format(bind_rotation[0], bind_rotation[1], bind_rotation[2], bind_rotation[3]))
+			print('\t\tbind_rotation = [ {}, {}, {}, {} ]'.format(bind_rotation[0], bind_rotation[1], bind_rotation[2], bind_rotation[3]), file = file)
 
 		bind_translation = bone['bind_translation']
 		if not is_key_default(bind_translation, default_translation):
-			print('\t\tbind_translation = [ {}, {}, {} ]'.format(bind_translation[0], bind_translation[1], bind_translation[2]))
+			print('\t\tbind_translation = [ {}, {}, {} ]'.format(bind_translation[0], bind_translation[1], bind_translation[2]), file = file)
 
 		bind_scale = bone['bind_scale']
 		if not is_key_default(bind_scale, default_scale):
-			print('\t\tbind_scale = [ {}, {}, {} ]'.format(bind_scale[0], bind_scale[1], bind_scale[2]))
+			print('\t\tbind_scale = [ {}, {}, {} ]'.format(bind_scale[0], bind_scale[1], bind_scale[2]), file = file)
 
-		print('\t}')
-	print(']')
-	print('')
+		print('\t}', file = file)
+	print(']', file = file)
+	print('', file = file)
 
 def print_tracks(file, tracks):
-	print('tracks =')
-	print('[')
+	print('tracks =', file = file)
+	print('[', file = file)
 	for track in tracks:
 		if len(track.rotations) + len(track.translations) + len(track.scales) == 0:
 			continue
 
-		print('\t{')
-		print('\t\tname = "{}"'.format(track.name))
+		print('\t{', file = file)
+		print('\t\tname = "{}"'.format(track.name), file = file)
 		if len(track.rotations) != 0:
-			print('\t\trotations =')
-			print('\t\t[')
+			print('\t\trotations =', file = file)
+			print('\t\t[', file = file)
 			for rotation in track.rotations:
-				print('\t\t\t[ {}, {}, {}, {} ]'.format(rotation[0], rotation[1], rotation[2], rotation[3]))
-			print('\t\t]')
+				print('\t\t\t[ {}, {}, {}, {} ]'.format(rotation[0], rotation[1], rotation[2], rotation[3]), file = file)
+			print('\t\t]', file = file)
 
 		if len(track.translations) != 0:
-			print('\t\ttranslations =')
-			print('\t\t[')
+			print('\t\ttranslations =', file = file)
+			print('\t\t[', file = file)
 			for translation in track.translations:
-				print('\t\t\t[ {}, {}, {} ]'.format(translation[0], translation[1], translation[2]))
-			print('\t\t]')
+				print('\t\t\t[ {}, {}, {} ]'.format(translation[0], translation[1], translation[2]), file = file)
+			print('\t\t]', file = file)
 
 		if len(track.scales) != 0:
-			print('\t\tscales =')
-			print('\t\t[')
+			print('\t\tscales =', file = file)
+			print('\t\t[', file = file)
 			for scale in track.scales:
-				print('\t\t\t[ {}, {}, {} ]'.format(scale[0], scale[1], scale[2]))
-			print('\t\t]')
+				print('\t\t\t[ {}, {}, {} ]'.format(scale[0], scale[1], scale[2]), file = file)
+			print('\t\t]', file = file)
 
-		print('\t}')
-	print(']')
-	print('')
+		print('\t}', file = file)
+	print(']', file = file)
+	print('', file = file)
 
 def parse_argv():
 	options = {}
@@ -418,8 +418,8 @@ def convert_file(fbx_filename, anim_stack_name, start_time, end_time, acl_filena
 		else:
 			file = sys.stdout
 
-		print('version = {}'.format(ACL_FILE_FORMAT_VERSION))
-		print('')
+		print('version = {}'.format(ACL_FILE_FORMAT_VERSION), file = file)
+		print('', file = file)
 		print_clip(file, clip)
 		print_bones(file, bones)
 		print_tracks(file, tracks)
