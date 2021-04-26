@@ -492,12 +492,7 @@ static void try_algorithm(const Options& options, iallocator& allocator, const t
 
 		if (options.output_bin_filename != nullptr)
 		{
-#ifdef _WIN32
-			char output_bin_filename[64 * 1024] = { 0 };
-			snprintf(output_bin_filename, get_array_size(output_bin_filename), "\\\\?\\%s", options.output_bin_filename);
-#else
 			const char* output_bin_filename = options.output_bin_filename;
-#endif
 
 			std::ofstream output_file_stream(output_bin_filename, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
 			if (output_file_stream.is_open())
@@ -611,9 +606,7 @@ static bool read_file(iallocator& allocator, const char* input_filename, char*& 
 	std::FILE* file = nullptr;
 
 #ifdef _WIN32
-	char path[64 * 1024] = { 0 };
-	snprintf(path, get_array_size(path), "\\\\?\\%s", input_filename);
-	fopen_s(&file, path, "rb");
+	fopen_s(&file, input_filename, "rb");
 #else
 	file = fopen(input_filename, "rb");
 #endif
